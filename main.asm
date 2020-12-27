@@ -1,5 +1,6 @@
 INCLUDE "gbhw.inc"
 
+;definir local na memoria de objetos para as propriedas dos sprites
 _SPR0_Y EQU _OAMRAM
 _SPR0_X EQU _OAMRAM+1
 _SPR0_NUM EQU _OAMRAM+2
@@ -10,6 +11,7 @@ _SPR1_X EQU _OAMRAM+5
 _SPR1_NUM EQU _OAMRAM+6
 _SPR1_ATT EQU _OAMRAM+7
 
+;definir local da memoria de de acesso aleatorio para dados comuns
 _PAD EQU _RAM
 _GRAV EQU _RAM+1
 _GROUND EQU _RAM+2
@@ -19,51 +21,64 @@ SECTION "start", ROM0[$0100]
     nop
     jp inicio
 
+    ;definir cabeçalho do rom
     ROM_HEADER ROM_NOMBC, ROM_SIZE_32KBYTE, RAM_SIZE_0KBYTE
 
+;label para inicio
 inicio:
     nop
     di
     ld sp, $ffff
+
+;inicialização de valores nos locais especificos da memoria
 inicializacao:
 
     ld hl, _SPR_ROCKET_SUM
     ld [hl], 0
 
+    ;definindo primeira palheta(da cor mais escura 11 até a mais clara 00)
     ld a, %11100100
     ld [rBGP], a
     ld [rOBP0], a
 
+    ;definindo sengunda palheta
     ld a, %11010000
     ld [rOBP1], a
 
+    ;zerando o X e Y do scroll da tela
     ld a, 0
     ld [rSCX], a
     ld [rSCY], a
 
     call apagaLCD
 
+    ;copiando tiles para a memoria de video
     ld hl, Tiles
     ld de, _VRAM
     ld bc, FimTiles-Tiles
     call CopiarMemoria
 
+    ;copiando mapa de tiles do fundo na tela 0
     ld hl, FundoEspaco
     ld de, _SCRN0
     ld bc, 32*32
     call CopiarMemoria
 
+    ;zerando a memoria de objetos
     ld de, _OAMRAM
 	ld bc, 40*4
 	ld l, 0
 	call PreencherMemoria
 
+    ;definindo a gravidade para 2 pixels por frame
     ld a, 2
     ld [_GRAV], a
 
+    ;definindo onde começa o chão
     ld a, 152-16
     ld [_GROUND], a
 
+    ;definindo as propriedades dos 2 sprites
     ld a, 100
 	ld [_SPR0_Y], a
 	ld a, 100
@@ -82,6 +97,7 @@ inicializacao:
 	ld a, 0
 	ld [_SPR1_ATT], a
 
+    ;configurando a tela LCD
     ld a, LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON|LCDCF_OBJ8|LCDCF_OBJON
     ld [rLCDC], a
 
