@@ -48,7 +48,7 @@ inicializacao:
     ld bc, FimTiles-Tiles
     call CopiarMemoria
 
-    ld hl, Mapa
+    ld hl, FundoEspaco
     ld de, _SCRN0
     ld bc, 32*32
     call CopiarMemoria
@@ -304,6 +304,6 @@ Tiles:
     include "Foguete_Tiles.z80"
 FimTiles:
 
-Mapa:
-    include "Mapa.z80"
-FimMapa:
+FundoEspaco:
+    include "FundoEspaco.z80"
+FimFundoEspaco:
