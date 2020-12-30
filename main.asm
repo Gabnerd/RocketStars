@@ -61,6 +61,32 @@ _BASE_SPR4_X EQU _OAMRAM+45
 _BASE_SPR4_NUM EQU _OAMRAM+46
 _BASE_SPR4_ATT EQU _OAMRAM+47
 
+;partes derrubadas do foguete
+_PART_SPR0_Y EQU _OAMRAM+48
+_PART_SPR0_X EQU _OAMRAM+49
+_PART_SPR0_NUM EQU _OAMRAM+50
+_PART_SPR0_ATT EQU _OAMRAM+51
+
+_PART_SPR1_Y EQU _OAMRAM+52
+_PART_SPR1_X EQU _OAMRAM+53
+_PART_SPR1_NUM EQU _OAMRAM+54
+_PART_SPR1_ATT EQU _OAMRAM+55
+
+_PART_SPR2_Y EQU _OAMRAM+56
+_PART_SPR2_X EQU _OAMRAM+57
+_PART_SPR2_NUM EQU _OAMRAM+58
+_PART_SPR2_ATT EQU _OAMRAM+59
+
+_PART_SPR3_Y EQU _OAMRAM+60
+_PART_SPR3_X EQU _OAMRAM+61
+_PART_SPR3_NUM EQU _OAMRAM+62
+_PART_SPR3_ATT EQU _OAMRAM+63
+
+_PART_SPR4_Y EQU _OAMRAM+64
+_PART_SPR4_X EQU _OAMRAM+65
+_PART_SPR4_NUM EQU _OAMRAM+66
+_PART_SPR4_ATT EQU _OAMRAM+67
+
 ;definir local da memoria de de acesso aleatorio para dados comuns
 _PAD EQU _RAM
 _GRAV EQU _RAM+1
@@ -68,6 +94,7 @@ _GROUND EQU _RAM+2
 _AUX0 EQU _RAM+3
 _LOCAL_ROCKET EQU _RAM+4
 _STATUS_ROCKET_BUILD EQU _RAM+5
+_CARREGADO EQU _RAM+6
 
 SECTION "start", ROM0[$0100]
     nop
@@ -130,6 +157,9 @@ inicializacao:
     ld a, 40
     ld [_LOCAL_ROCKET], a
 
+    ld a, 0
+    ld [_CARREGADO], a
+
     ;esquema do numero do sprite do foguete
     ;  4
     ;  3
@@ -143,24 +173,25 @@ inicializacao:
     ;  5  mostrar sprite 4
     ;bit 6, 7 e 8 são inutilizados(por enquanto)
     ld a, %00000000
+    ld [_STATUS_ROCKET_BUILD], a
 
     ;definindo as propriedades dos 2 sprites que compoem o personagem
     ld a, 100
 	ld [_SPR0_Y], a
-	ld a, 100
+	ld a, $9E
 	ld [_SPR0_X], a
 	ld a, 1
 	ld [_SPR0_NUM], a
-	ld a, %10000000
+    ld a, 0
 	ld [_SPR0_ATT], a
 
     ld a, 100+8
 	ld [_SPR1_Y], a
-	ld a, 100
+	ld a, $9E
 	ld [_SPR1_X], a
 	ld a, 2
 	ld [_SPR1_NUM], a
-	ld a, %10000000
+    ld a, 0
 	ld [_SPR1_ATT], a
 
     ;posição dos sprites de cada parte do foguete
@@ -174,7 +205,7 @@ inicializacao:
     ld [_ROCKET_SPR0_Y], a
     ld a, [_LOCAL_ROCKET]
     ld [_ROCKET_SPR0_X], a
-    ld a, 18
+    ld a, 0
     ld [_ROCKET_SPR0_NUM], a
     ld a, 0
     ld [_ROCKET_SPR0_ATT], a
@@ -185,7 +216,7 @@ inicializacao:
     ld a, [_ROCKET_SPR0_X]
     sub 8
     ld [_ROCKET_SPR1_X], a
-    ld a, 17
+    ld a, 0
     ld [_ROCKET_SPR1_NUM], a
     ld a, 0
     set 5, a
@@ -197,7 +228,7 @@ inicializacao:
     ld a, [_ROCKET_SPR0_X]
     add 8
     ld [_ROCKET_SPR2_X], a
-    ld a, 17
+    ld a, 0
     ld [_ROCKET_SPR2_NUM], a
     ld a, 0
     ld [_ROCKET_SPR2_ATT], a
@@ -208,7 +239,7 @@ inicializacao:
     ld [_ROCKET_SPR3_Y], a
     ld a, [_ROCKET_SPR0_X]
     ld [_ROCKET_SPR3_X], a
-    ld a, 22
+    ld a, 0
     ld [_ROCKET_SPR3_NUM], a
     ld a, 0
     ld [_ROCKET_SPR3_ATT], a
@@ -219,74 +250,84 @@ inicializacao:
     ld [_ROCKET_SPR4_Y], a
     ld a, [_ROCKET_SPR3_X]
     ld [_ROCKET_SPR4_X], a
-    ld a, 19
+    ld a, 0
     ld [_ROCKET_SPR4_NUM], a
     ld a, 0
     ld [_ROCKET_SPR4_ATT], a
 
 
-    ;Base do foguete
-    ;tile central da base - SPR1
-    ld a, [_GROUND]
-    ld [_BASE_SPR1_Y], a
-    ld a, [_LOCAL_ROCKET]
-    ld [_BASE_SPR1_X], a
-    ld a, 21
-    ld [_BASE_SPR1_NUM], a
-    ld a, 0
-    ld [_BASE_SPR1_ATT], a
 
-    ;tile esquerda da base - SPR0
-    ld a, [_GROUND]
-    ld [_BASE_SPR0_Y], a
-    ld a, [_BASE_SPR1_X]
-    sub 16
-    ld [_BASE_SPR0_X], a
-    ld a, 20
-    ld [_BASE_SPR0_NUM], a
-    ld a, 0
-    ld [_BASE_SPR0_ATT], a
 
-    ;tile centro esquerda da base - SPR3
-    ld a, [_GROUND]
-    ld [_BASE_SPR3_Y], a
-    ld a, [_BASE_SPR1_X]
-    sub 8
-    ld [_BASE_SPR3_X], a
-    ld a, 21
-    ld [_BASE_SPR3_NUM], a
-    ld a, 0
-    ld [_BASE_SPR3_ATT], a
 
-    ;tile centro direita da base - SPR4
-    ld a, [_GROUND]
-    ld [_BASE_SPR4_Y], a
-    ld a, [_BASE_SPR1_X]
-    add 8
-    ld [_BASE_SPR4_X], a
-    ld a, 21
-    ld [_BASE_SPR4_NUM], a
-    ld a, 0
-    ld [_BASE_SPR4_ATT], a
 
-    ;tile direta da base SPR2
+
+
+
+
+    ;zona de testes para colocação das partes espalhadas do foguete
     ld a, [_GROUND]
-    ld [_BASE_SPR2_Y], a
-    ld a, [_BASE_SPR1_X]
+    ld [_PART_SPR0_Y], a
+    ld a, 56+16
+    ld [_PART_SPR0_X], a
+    ld a, 18
+    ld [_PART_SPR0_NUM], a
+    ld a, 0
+    ld [_PART_SPR0_ATT], a
+
+    ld a, [_GROUND]
+    ld [_PART_SPR1_Y], a
+    ld a, [_PART_SPR0_X]
     add 16
-    ld [_BASE_SPR2_X], a
-    ld a, 20
-    ld [_BASE_SPR2_NUM], a
+    ld [_PART_SPR1_X], a
+    ld a, 17
+    ld [_PART_SPR1_NUM], a
     ld a, 0
     set 5, a
-    ld [_BASE_SPR2_ATT], a
+    ld [_PART_SPR1_ATT], a
+
+    ld a, [_GROUND]
+    ld [_PART_SPR2_Y], a
+    ld a, [_PART_SPR1_X]
+    add 16
+    ld [_PART_SPR2_X], a
+    ld a, 17
+    ld [_PART_SPR2_NUM], a
+    ld a, 0
+    ld [_PART_SPR2_ATT], a
+
+    ld a, [_GROUND]
+    ld [_PART_SPR3_Y], a
+    ld a, [_PART_SPR2_X]
+    add 16
+    ld [_PART_SPR3_X], a
+    ld a, 22
+    ld [_PART_SPR3_NUM], a
+    ld a, 0
+    ld [_PART_SPR3_ATT], a
+
+    ld a, [_GROUND]
+    ld [_PART_SPR4_Y], a
+    ld a, [_PART_SPR3_X]
+    add 16
+    ld [_PART_SPR4_X], a
+    ld a, 19
+    ld [_PART_SPR4_NUM], a
+    ld a, 0
+    ld [_PART_SPR4_ATT], a
+
+
+
+
+
+
 
     ;configurando a tela LCD
     ld a, LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON|LCDCF_OBJ8|LCDCF_OBJON
     ld [rLCDC], a
 
-movimiento:
+movimento:
     call lerInput
+    call entregarPeca
 .wait
 	ld a, [rLY]
 	cp 145
@@ -313,10 +354,11 @@ movimiento:
     ld hl, _GROUND
     cp [hl]
     call c, gravidade
-
+    call controleCarregamento
+    call conferirStatusFoguete
 	ld bc, 2000
 	call retardo
-	jr movimiento
+	jr movimento
 
 voar:
     ld a, 3
@@ -496,6 +538,291 @@ gravidade:
     ld a, [_SPR1_Y]
     add a, [hl]
     ld [_SPR1_Y], a
+    ret
+
+conferirStatusFoguete:
+    ;esquema do numero do sprite do foguete
+    ;  4
+    ;  3
+    ;1 0 2
+    ;
+    ; bit função
+    ;  1  mostrar sprite 0
+    ;  2  mostrar sprite 1
+    ;  3  mostrar sprite 2
+    ;  4  mostrar sprite 3
+    ;  5  mostrar sprite 4
+    ;bit 6, 7 e 8 são inutilizados(por enquanto)
+    ;
+    ;SPR0_NUM = 18
+    ;SPR1_NUM = 17
+    ;SPR2_NUM = 17
+    ;SPR3_NUM = 22
+    ;SPR4_NUM = 19
+    
+    call .conferirBico
+    call .conferirCorpo
+    call .conferirCentro
+    call .conferirAsaEsquerda
+    call .conferirAsaDireita
+    ret
+.conferirBico:
+    ld a, [_STATUS_ROCKET_BUILD]
+    and %00001000
+    ret z
+    ld hl, _ROCKET_SPR4_NUM
+    ld a, 19
+    ld [hl], a
+    call esconderPeca4
+    ret
+.conferirCorpo:
+    ld a, [_STATUS_ROCKET_BUILD]
+    and a, %00010000
+    ret z
+    ld hl, _ROCKET_SPR3_NUM
+    ld [hl], 22
+    call esconderPeca3
+    ret
+.conferirCentro:
+    ld a, [_STATUS_ROCKET_BUILD]
+    and %10000000
+    ret z
+    ld hl, _ROCKET_SPR0_NUM
+    ld [hl], 18
+    call esconderPeca0
+    ret
+.conferirAsaEsquerda:
+    ld a, [_STATUS_ROCKET_BUILD]
+    and %01000000
+    ret z
+    ld hl, _ROCKET_SPR1_NUM
+    ld [hl], 17
+    call esconderPeca1
+    ret
+.conferirAsaDireita:
+    ld a, [_STATUS_ROCKET_BUILD]
+    and %00100000
+    ret z
+    ld hl, _ROCKET_SPR2_NUM
+    ld [hl], 17
+    call esconderPeca2
+    ret
+
+controleCarregamento:
+
+    ld a, [_CARREGADO]
+    cp %10000000
+    call z, .setSpr0Carry
+
+    ld a, [_CARREGADO]
+    cp %01000000
+    call z, .setSpr1Carry
+
+    ld a, [_CARREGADO]
+    cp %00100000
+    call z, .setSpr2Carry
+
+    ld a, [_CARREGADO]
+    cp %00010000
+    call z, .setSpr3Carry
+
+    ld a, [_CARREGADO]
+    cp %00001000
+    call z, .setSpr4Carry
+
+    ld a, [_CARREGADO]
+    cp 0
+    ret nz
+    call .controleCarrySpr0
+    call .controleCarrySpr1
+    call .controleCarrySpr2
+    call .controleCarrySpr3
+    call .controleCarrySpr4
+    
+    ret
+.controleCarrySpr0:
+    ld a, [_SPR1_X]
+    ld hl, _PART_SPR0_X
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, %10000000
+    ld [_CARREGADO], a
+    ret
+.controleCarrySpr1:
+    ld a, [_SPR1_X]
+    ld hl, _PART_SPR1_X
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, %01000000
+    ld [_CARREGADO], a
+    ret
+.controleCarrySpr2:
+    ld a, [_SPR1_X]
+    ld hl, _PART_SPR2_X
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, %00100000
+    ld [_CARREGADO], a
+    ret
+.controleCarrySpr3:
+    ld a, [_SPR1_X]
+    ld hl, _PART_SPR3_X
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, %00010000
+    ld [_CARREGADO], a
+    ret
+.controleCarrySpr4:
+    ld a, [_SPR1_X]
+    ld hl, _PART_SPR4_X
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, %00001000
+    ld [_CARREGADO], a
+    ret
+.setSpr0Carry:
+    ld hl, _PART_SPR0_Y
+    ld a, [_SPR0_Y]
+    sub 8
+    ld [hl], a
+    ld hl, _PART_SPR0_X
+    ld a, [_SPR0_X]
+    ld [hl], a
+    ret
+.setSpr1Carry:
+    ld hl, _PART_SPR1_Y
+    ld a, [_SPR0_Y]
+    sub 8
+    ld [hl], a
+    ld hl, _PART_SPR1_X
+    ld a, [_SPR0_X]
+    ld [hl], a
+    ret
+.setSpr2Carry:
+    ld hl, _PART_SPR2_Y
+    ld a, [_SPR0_Y]
+    sub 8
+    ld [hl], a
+    ld hl, _PART_SPR2_X
+    ld a, [_SPR0_X]
+    ld [hl], a
+    ret
+.setSpr3Carry:
+    ld hl, _PART_SPR3_Y
+    ld a, [_SPR0_Y]
+    sub 8
+    ld [hl], a
+    ld hl, _PART_SPR3_X
+    ld a, [_SPR0_X]
+    ld [hl], a
+    ret
+.setSpr4Carry:
+    ld hl, _PART_SPR4_Y
+    ld a, [_SPR0_Y]
+    sub 8
+    ld [hl], a
+    ld hl, _PART_SPR4_X
+    ld a, [_SPR0_X]
+    ld [hl], a
+    ret
+
+entregarPeca:
+    ld a, [_SPR1_X]
+    ld hl, _LOCAL_ROCKET
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    jp nz, entregarPeca2
+    ld a, [_STATUS_ROCKET_BUILD]
+    ld hl, _CARREGADO
+    or [hl]
+    ld [_STATUS_ROCKET_BUILD], a
+    ld a, %00000000
+    ld [_CARREGADO], a
+    ret
+
+entregarPeca2:
+    ld a, [_SPR1_X]
+    ld hl, _LOCAL_ROCKET
+    add 1
+    sub [hl]
+    ld [_AUX0], a
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    sub [hl]
+    ld hl, _AUX0
+    cp [hl]
+    ret nz
+    ld a, [_STATUS_ROCKET_BUILD]
+    ld hl, _CARREGADO
+    or [hl]
+    ld [_STATUS_ROCKET_BUILD], a
+    ld a, %00000000
+    ld [_CARREGADO], a
+    ret
+esconderPeca0:
+    ld a, 0
+    ld [_PART_SPR0_NUM], a
+    ld [_PART_SPR0_X], a
+    ld [_PART_SPR0_Y], a
+    ret
+esconderPeca1:
+    ld a, 0
+    ld [_PART_SPR1_X], a
+    ld [_PART_SPR1_Y], a
+    ld [_PART_SPR1_NUM], a
+    ret
+esconderPeca2:
+    ld a, 0
+    ld [_PART_SPR2_NUM], a
+    ld [_PART_SPR2_X], a
+    ld [_PART_SPR2_Y], a
+    ret
+esconderPeca3:
+    ld a, 0
+    ld [_PART_SPR3_NUM], a
+    ld [_PART_SPR3_X], a
+    ld [_PART_SPR3_Y], a
+    ret
+esconderPeca4:
+    ld a, 0
+    ld [_PART_SPR4_NUM], a
+    ld [_PART_SPR4_X], a
+    ld [_PART_SPR4_Y], a
     ret
 
 Tiles:
