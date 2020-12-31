@@ -570,6 +570,14 @@ conferirStatusFoguete:
     ld a, [_STATUS_ROCKET_BUILD]
     and %00001000
     ret z
+    ld hl, _CARREGADO
+    ld a, [hl]
+    cp 0
+    jr z, .continuarConferirBico
+    ld a, %00001000
+    xor [hl]
+    ld [hl], a
+.continuarConferirBico:
     ld hl, _ROCKET_SPR4_NUM
     ld a, 19
     ld [hl], a
@@ -579,6 +587,14 @@ conferirStatusFoguete:
     ld a, [_STATUS_ROCKET_BUILD]
     and a, %00010000
     ret z
+    ld hl, _CARREGADO
+    ld a, [hl]
+    cp 0
+    jr z, .continuarConferirCorpo
+    ld a, %00010000
+    xor [hl]
+    ld [hl], a
+.continuarConferirCorpo:
     ld hl, _ROCKET_SPR3_NUM
     ld [hl], 22
     call esconderPeca3
@@ -587,6 +603,14 @@ conferirStatusFoguete:
     ld a, [_STATUS_ROCKET_BUILD]
     and %10000000
     ret z
+    ld hl, _CARREGADO
+    ld a, [hl]
+    cp 0
+    jr z, .continuarConferirCentro
+    ld a, %10000000
+    xor [hl]
+    ld [hl], a
+.continuarConferirCentro:
     ld hl, _ROCKET_SPR0_NUM
     ld [hl], 18
     call esconderPeca0
@@ -595,6 +619,14 @@ conferirStatusFoguete:
     ld a, [_STATUS_ROCKET_BUILD]
     and %01000000
     ret z
+    ld hl, _CARREGADO
+    ld a, [hl]
+    cp 0
+    jr z, .continuarConferirAsaEsquerda
+    ld a, %01000000
+    xor [hl]
+    ld [hl], a
+.continuarConferirAsaEsquerda:
     ld hl, _ROCKET_SPR1_NUM
     ld [hl], 17
     call esconderPeca1
@@ -603,6 +635,14 @@ conferirStatusFoguete:
     ld a, [_STATUS_ROCKET_BUILD]
     and %00100000
     ret z
+    ld hl, _CARREGADO
+    ld a, [hl]
+    cp 0
+    jr z, .continuarConferirAsaDireita
+    ld a, %00100000
+    xor [hl]
+    ld [hl], a
+.continuarConferirAsaDireita:
     ld hl, _ROCKET_SPR2_NUM
     ld [hl], 17
     call esconderPeca2
@@ -643,13 +683,10 @@ controleCarregamento:
 .controleCarrySpr0:
     ld a, [_SPR1_X]
     ld hl, _PART_SPR0_X
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, %10000000
     ld [_CARREGADO], a
@@ -657,13 +694,10 @@ controleCarregamento:
 .controleCarrySpr1:
     ld a, [_SPR1_X]
     ld hl, _PART_SPR1_X
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, %01000000
     ld [_CARREGADO], a
@@ -671,13 +705,10 @@ controleCarregamento:
 .controleCarrySpr2:
     ld a, [_SPR1_X]
     ld hl, _PART_SPR2_X
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, %00100000
     ld [_CARREGADO], a
@@ -685,13 +716,10 @@ controleCarregamento:
 .controleCarrySpr3:
     ld a, [_SPR1_X]
     ld hl, _PART_SPR3_X
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, %00010000
     ld [_CARREGADO], a
@@ -699,13 +727,10 @@ controleCarregamento:
 .controleCarrySpr4:
     ld a, [_SPR1_X]
     ld hl, _PART_SPR4_X
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, %00001000
     ld [_CARREGADO], a
@@ -759,41 +784,44 @@ controleCarregamento:
 entregarPeca:
     ld a, [_SPR1_X]
     ld hl, _LOCAL_ROCKET
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
-    jp nz, entregarPeca2
+    jr nz, entregarPeca2
+    call isOnGround
+    cp 1
+    jr nz, entregarPeca2
     ld a, [_STATUS_ROCKET_BUILD]
     ld hl, _CARREGADO
     or [hl]
     ld [_STATUS_ROCKET_BUILD], a
-    ld a, %00000000
-    ld [_CARREGADO], a
+    ld a, 0
+    ld [hl], a
     ret
-
 entregarPeca2:
     ld a, [_SPR1_X]
     ld hl, _LOCAL_ROCKET
     add 1
-    sub [hl]
-    ld [_AUX0], a
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    sub [hl]
-    ld hl, _AUX0
     cp [hl]
+    ret nz
+    call isOnGround
+    cp 1
     ret nz
     ld a, [_STATUS_ROCKET_BUILD]
     ld hl, _CARREGADO
     or [hl]
     ld [_STATUS_ROCKET_BUILD], a
-    ld a, %00000000
-    ld [_CARREGADO], a
+    ld a, 0
+    ld [hl], a
     ret
+isOnGround:
+    ld a, [_SPR1_Y]
+    ld hl, _GROUND
+    add 8
+    cp [hl]
+    ld a, 0
+    ret c
+    ld a, 1
+    ret
+
 esconderPeca0:
     ld a, 0
     ld [_PART_SPR0_NUM], a
