@@ -92,7 +92,14 @@ _PAD EQU _RAM
 _GRAV EQU _RAM+1
 _GROUND EQU _RAM+2
 _AUX0 EQU _RAM+3
+
+;local na memoria para armazenar o local do foguete
 _LOCAL_ROCKET EQU _RAM+4
+;local na memoria para armazenar o primeiro spot para entrega
+_SPOT_ENTREGA0 EQU _RAM+7
+;local na memoria para armazenar o segundo spot para entrega
+_SPOT_ENTREGA1 EQU _RAM+8
+
 _STATUS_ROCKET_BUILD EQU _RAM+5
 _CARREGADO EQU _RAM+6
 
@@ -156,6 +163,12 @@ inicializacao:
     ;atribuindo valor para a localização central do foguete
     ld a, 40
     ld [_LOCAL_ROCKET], a
+
+    ld a, [_LOCAL_ROCKET]
+    sub 3
+    ld [_SPOT_ENTREGA0], a
+    add 7
+    ld [_SPOT_ENTREGA1], a
 
     ld a, 0
     ld [_CARREGADO], a
@@ -255,16 +268,7 @@ inicializacao:
     ld a, 0
     ld [_ROCKET_SPR4_ATT], a
 
-
-
-
-
-
-
-
-
-
-    ;zona de testes para colocação das partes espalhadas do foguete
+    ;partes sepadas do foguete
     ld a, [_GROUND]
     ld [_PART_SPR0_Y], a
     ld a, 56+16
@@ -327,7 +331,7 @@ inicializacao:
 
 movimento:
     call lerInput
-    call entregarPeca
+    
 .wait
 	ld a, [rLY]
 	cp 145
@@ -356,6 +360,7 @@ movimento:
     call c, gravidade
     call controleCarregamento
     call conferirStatusFoguete
+    call entregarPeca
 	ld bc, 2000
 	call retardo
 	jr movimento
@@ -782,25 +787,8 @@ controleCarregamento:
     ret
 
 entregarPeca:
-    ld a, [_SPR1_X]
-    ld hl, _LOCAL_ROCKET
-    cp [hl]
-    jr nz, entregarPeca2
-    call isOnGround
+    call .isOnLocalRocket
     cp 1
-    jr nz, entregarPeca2
-    ld a, [_STATUS_ROCKET_BUILD]
-    ld hl, _CARREGADO
-    or [hl]
-    ld [_STATUS_ROCKET_BUILD], a
-    ld a, 0
-    ld [hl], a
-    ret
-entregarPeca2:
-    ld a, [_SPR1_X]
-    ld hl, _LOCAL_ROCKET
-    add 1
-    cp [hl]
     ret nz
     call isOnGround
     cp 1
@@ -812,15 +800,35 @@ entregarPeca2:
     ld a, 0
     ld [hl], a
     ret
-isOnGround:
-    ld a, [_SPR1_Y]
-    ld hl, _GROUND
-    add 8
+
+.isOnLocalRocket:
+    ld a, [_SPR1_X]
+    ld hl, _SPOT_ENTREGA0
     cp [hl]
+    jr nc, .isOnLocalRocket2
     ld a, 0
-    ret c
+    ret
+.isOnLocalRocket2:
+    ld a, [_SPR1_X]
+    ld hl, _SPOT_ENTREGA1
+    cp [hl]
     ld a, 1
+    ret c
+    ld a, 0
     ret
+
+isOnGround:
+    ld a, [_SPR1_NUM]
+    cp 2
+    ld a, 1
+    ret z
+    ld a, [_SPR1_NUM]
+    cp 11
+    ld a, 1
+    ret z
+    ld a, 0
+    ret
+
 
 esconderPeca0:
     ld a, 0
